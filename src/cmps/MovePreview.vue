@@ -3,7 +3,7 @@
     <div class="move-preview flex">
       <div class="from flex column align-center">
         <img :src="`https://robohash.org/${user.name}.png`" />
-        <p>{{ user.username }}</p>
+        <p>{{ user.name }}</p>
       </div>
       <strong>→</strong>
       <div

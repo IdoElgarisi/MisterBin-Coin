@@ -1,16 +1,28 @@
 <template>
   <section class="home">
-    <div v-if="user" class="user-info flex align-center">
-      <img :src="`https://robohash.org/${user.name}.png`" />
-      <div class="flex column">
-        <p>Hi {{ user.username }}</p>
-        <p>Balance:</p>
-        <p>
-          {{ user.balance }} BITS <span>( ${{ getBtcToUsd }} )</span>
-        </p>
+    <section v-if="loggedInUser">
+      <div class="user-info flex align-center">
+        <img :src="`https://robohash.org/${loggedInUser.name}.png`" />
+        <div class="flex column">
+          <p>Hi {{ loggedInUser.name }}</p>
+          <p>Balance:</p>
+          <p>
+            {{ loggedInUser.balance }} BITS <span>( ${{ getBtcToUsd }} )</span>
+          </p>
+        </div>
       </div>
+      <div class="logout-btn-container flex justify-center">
+        <button class="logout-btn" @click="logout">Logout</button>
+      </div>
+    </section>
+    <div v-else-if="!loggedInUser" class="no-user-section">
+      <login-modal :isSignup="isSignup" @login="login" />
+      <div>
+      <button v-if="!isSignup" @click="onOpenSignup">Signup</button>
+      </div>
+
     </div>
-    <MoveList v-if="user" :user="user" />
+    <MoveList v-if="loggedInUser" :user="loggedInUser" />
   </section>
 </template>
 
@@ -18,11 +30,12 @@
 import { getUser } from "../services/user.service";
 import { getRate } from "../services/bitcoin.service";
 import MoveList from "../cmps/MoveList.vue";
+import loginModal from "../cmps/login-modal.vue";
 export default {
   data() {
     return {
-      user: null,
       rate: null,
+      isSignup:false
     };
   },
   methods: {
@@ -38,16 +51,33 @@ export default {
         this.rate = await getRate();
       } catch (err) {}
     },
+    async login(creds) {
+      await this.$store.dispatch({ type: "login", creds });
+    },
+    async logout() {
+      await this.$store.dispatch({ type: "logout" });
+    },
+    onOpenSignup(){
+      this.isSignup=true
+    }
   },
   computed: {
+    loggedInUser() {
+      return this.$store.getters.loggedInUser;
+    },
     getBtcToUsd() {
-      return (this.user.balance / this.rate).toLocaleString("en-US");
+      return (this.loggedInUser.balance / this.rate).toLocaleString("en-US");
     },
   },
-  created() {
-    this.loadUser();
+
+  async created() {
+    // this.loadUser();
     this.getRate();
+    this.$store.dispatch({ type: "loadUser" });
   },
-  components: { MoveList },
+  components: {
+    MoveList,
+    loginModal,
+  },
 };
 </script>

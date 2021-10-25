@@ -1,33 +1,98 @@
-import { loadFromStorage, saveToStorage } from '../services/storage.service'
-import { contactService } from '../services/contact.service'
-const HC_USER = {
-    username: "Muki D",
-    balance: 100,
-    moves: []
+'use strict';
+
+import { DbService } from './db-service.js';
+import { utils } from './utils.service.js';
+import baseUsers from './users.json';
+
+const KEY = 'users';
+
+export default {
+    query,
+    get,
+    remove,
+    save,
+    getEmptyUser,
+    getByEmail,
+    login,
+    logout,
+    getLoggedInUser,
+    signup
+};
+
+async function login(creds) {
+    const user = await getByEmail(creds.email);
+
+    if (user.password !== creds.password) {
+        throw new Error('Wrong name or email');
+    }
+    if (!user.balance) user.balance = 100;
+    console.log('logged in ', user);
+
+    utils.storeToStorage('loggedInUser', user);
+    return user;
 }
 
-export async function getUser() {
-    const localUser = loadFromStorage('user')
-    const user = localUser ? localUser : HC_USER
-    saveToStorage('user', user)
-    return Promise.resolve(user)
+async function signup(creds) {
+    creds.balance = 100;
+    console.log('logged in ', creds);
+    const user = await save(creds)
+    utils.storeToStorage('loggedInUser', user);
+    return user;
 }
 
-export async function updateUser() {
-    console.log('updating user')
+async function logout() {
+    localStorage.removeItem('loggedInUser');
+    return Promise.resolve();
 }
 
-export async function transfer(amount, contactId) {
-    const user = loadFromStorage('user')
-    user.moves.unshift({
-        amount,
-        balanceBefore: user.balance,
-        contact: await contactService.getById(contactId),
-        transferedAt: Date.now(),
-        id: Date.now() % 1000
-    })
-    user.balance -= amount;
-    saveToStorage('user', user)
-    return Promise.resolve()
+function getLoggedInUser() {
+    const user = localStorage.loggedInUser;
+    if (!user) return null;
+    return JSON.parse(user);
 }
 
+async function getByEmail(email) {
+    const users = await query();
+    const user = users.find(user => user.email === email);
+    if (!user) {
+        throw new Error('Unknown User');
+    }
+    return Promise.resolve(user);
+}
+
+async function query() {
+    var users = await DbService.query(KEY);
+    if (!users || !users.length) {
+        users = baseUsers;
+        await DbService.insert(KEY, users);
+    }
+    return users;
+}
+
+async function get(id) {
+    const user = await DbService.get(KEY, id);
+    if (!user) {
+        throw new Error('Unknown User');
+    }
+    return user;
+}
+
+function remove(id) {
+    return DbService.delete(KEY, id);
+}
+
+function save(user) {
+    if (user._id) return DbService.put(KEY, user);
+    else return DbService.post(KEY, user);
+}
+
+
+function getEmptyUser() {
+    return {
+        name: "",
+        email: "",
+        phone: "",
+        password: "",
+        isAdmin: false
+    };
+}
