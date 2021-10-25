@@ -40,7 +40,6 @@
 </template>
 <script>
 import { contactService } from "../services/contact.service";
-import { getUser } from "../services/user.service";
 import { transferBits } from "../services/bitcoin.service";
 import MoveList from "../cmps/MoveList.vue";
 export default {
