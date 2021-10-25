@@ -1,0 +1,12 @@
+.filter-container{
+    .filter-input{
+        margin-top: 5px;
+        height: 30px;
+        font-size: 1.2rem;
+        border: none;
+        border: .5px solid $clr2;
+        width: 90%;
+        background-color: inherit;
+        color: $clr3;
+    }
+}

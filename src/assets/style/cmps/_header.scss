@@ -1,0 +1,31 @@
+header {
+    .header {
+        width: 100%;
+        padding: 10px 0;
+        height: 60px;
+        background: $clr1;
+        color: rgb(255, 255, 255);
+        text-shadow: 0px 0px 1px black;
+        h1 {
+            font-size: rem(24px);
+            font-weight: 100;
+        }
+    }
+    nav {
+        background-color: $clr1;
+        gap: 10px;
+        height: 30px;
+        .nav-list {
+            height: 100%;
+            width: 90%;
+            justify-content: space-around;
+        }
+        a {
+            color: $clr3;
+            text-decoration: none;
+        }
+        .router-link-exact-active {
+            color: $main;
+        }
+    }
+}
