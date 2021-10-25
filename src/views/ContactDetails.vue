@@ -34,7 +34,7 @@
         </form>
       </div>
       <p>{{ transferStatus }}</p>
-      <MoveList v-if="user" :user="getFilteredMoves" />
+      <MoveList v-if="loggedInUser" :user="getFilteredMoves" />
     </section>
   </div>
 </template>
@@ -55,7 +55,6 @@ export default {
   },
   created() {
     this.loadContact();
-    this.loadUser();
   },
   methods: {
     async loadContact() {
@@ -63,9 +62,7 @@ export default {
       if (!contactId) return;
       this.contact = await contactService.getById(contactId);
     },
-    async loadUser() {
-      this.user = await getUser();
-    },
+ 
     async transfer() {
       if (this.transferAmount <= 0) return;
       try {
@@ -83,8 +80,11 @@ export default {
     },
   },
   computed: {
+      loggedInUser() {
+      return this.$store.getters.loggedInUser;
+    },
     getFilteredMoves() {
-      const user = { ...this.user };
+      const user = this.loggedInUser()
       user.moves = user.moves.filter(
         (move) => move.contact._id === this.contact._id
       );
