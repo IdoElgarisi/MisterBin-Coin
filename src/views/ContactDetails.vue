@@ -34,13 +34,12 @@
         </form>
       </div>
       <p>{{ transferStatus }}</p>
-      <MoveList v-if="user" :user="getFilteredMoves" />
+      <MoveList v-if="loggedInUser" :user="getFilteredMoves" />
     </section>
   </div>
 </template>
 <script>
 import { contactService } from "../services/contact.service";
-import { getUser } from "../services/user.service";
 import { transferBits } from "../services/bitcoin.service";
 import MoveList from "../cmps/MoveList.vue";
 export default {
@@ -63,8 +62,8 @@ export default {
       if (!contactId) return;
       this.contact = await contactService.getById(contactId);
     },
-    async loadUser() {
-      this.user = await getUser();
+     loggedInUser() {
+      return this.$store.getters.loggedInUser;
     },
     async transfer() {
       if (this.transferAmount <= 0) return;
